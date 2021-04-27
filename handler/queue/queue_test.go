@@ -2,6 +2,7 @@ package queue
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/DATA-DOG/godog/gherkin"
@@ -11,7 +12,7 @@ import (
 )
 
 func TestPublishMessage(t *testing.T) {
-
+	fmt.Println("masuk test publish")
 	ctrl := gomock.NewController(t)
 
 	defer ctrl.Finish()
@@ -54,6 +55,7 @@ func TestPublishMessage(t *testing.T) {
 }
 
 func TestListenMessage(t *testing.T) {
+	fmt.Println("masuk test listen")
 	ctrl := gomock.NewController(t)
 
 	defer ctrl.Finish()
@@ -84,6 +86,48 @@ func TestListenMessage(t *testing.T) {
 		}
 
 		err := h.listenMessage(tc.resourceName, tc.target)
+		if err != nil {
+			assert.Contains(t, err.Error(), tc.err)
+		}
+		if tc.err != "" {
+			assert.Error(t, err)
+		}
+
+	}
+}
+
+func TestListenMessageForever(t *testing.T) {
+	fmt.Println("masuk test listen forever")
+	ctrl := gomock.NewController(t)
+
+	defer ctrl.Finish()
+
+	q := mocks.NewMockResource(ctrl)
+	h := New(map[string]Resource{"q": q})
+
+	for _, tc := range []struct {
+		name string
+
+		resourceName string
+		target       string
+
+		err string
+	}{
+		{
+			name: "invalid resource name",
+			err:  "not found",
+		},
+		{
+			name:         "",
+			resourceName: "q",
+			target:       "abc",
+		},
+	} {
+		if tc.err == "" {
+			q.EXPECT().Listen(tc.target).Return(nil)
+		}
+
+		err := h.listenMessageForever(tc.resourceName, tc.target)
 		if err != nil {
 			assert.Contains(t, err.Error(), tc.err)
 		}

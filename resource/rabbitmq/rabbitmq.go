@@ -138,10 +138,10 @@ func (c *RabbitMQ) Listen(target string) error {
 		return errors.Wrapf(err, "%s: failed to bind to queue `%s`", resourceName, q.Name)
 	}
 
-	if _, err := ch.QueuePurge(q.Name, false); err != nil {
-		return errors.Wrapf(err, "%s: failed to purge to queue `%s`", resourceName, q.Name)
-	}
-	c.consumedMessage[target] = make([][]byte, 0)
+	// if _, err := ch.QueuePurge(q.Name, false); err != nil {
+	// 	return errors.Wrapf(err, "%s: failed to purge to queue `%s`", resourceName, q.Name)
+	// }
+	// c.consumedMessage[target] = make([][]byte, 0)
 
 	msgs, err := consume(ch, q.Name)
 	if err != nil {
@@ -151,6 +151,8 @@ func (c *RabbitMQ) Listen(target string) error {
 	go func(msgs <-chan amqp.Delivery, target string) {
 		for d := range msgs {
 			c.consume(target, d.Body)
+			fmt.Println(fmt.Sprintf("msg:%s from target topic %s", string(d.Body), target))
+			fmt.Println(c.consumedMessage)
 		}
 	}(msgs, target)
 
@@ -180,10 +182,10 @@ func (c *RabbitMQ) ListenForever(target string) error {
 		return errors.Wrapf(err, "%s: failed to bind to queue `%s`", resourceName, q.Name)
 	}
 
-	if _, err := ch.QueuePurge(q.Name, false); err != nil {
-		return errors.Wrapf(err, "%s: failed to purge to queue `%s`", resourceName, q.Name)
-	}
-	c.consumedMessage[target] = make([][]byte, 0)
+	// if _, err := ch.QueuePurge(q.Name, false); err != nil {
+	// 	return errors.Wrapf(err, "%s: failed to purge to queue `%s`", resourceName, q.Name)
+	// }
+	// c.consumedMessage[target] = make([][]byte, 0)
 
 	msgs, err := consume(ch, q.Name)
 	if err != nil {
@@ -195,6 +197,12 @@ func (c *RabbitMQ) ListenForever(target string) error {
 	go func(msgs <-chan amqp.Delivery, target string) {
 		for d := range msgs {
 			c.consume(target, d.Body)
+			fmt.Println(fmt.Sprintf("msg:%s from target topic %s", string(d.Body), target))
+			fmt.Println(c.consumedMessage)
+
+			if strings.Contains(string(d.Body), "Stop Listen") {
+				forever <- false
+			}
 		}
 	}(msgs, target)
 	<-forever
@@ -240,6 +248,7 @@ func (c *RabbitMQ) Publish(target string, payload []byte) error {
 		return errors.Wrapf(err, "%s: failed to publish message to target `%s`", resourceName, target)
 	}
 	time.Sleep(c.waitDuration)
+	// fmt.Println(fmt.Sprintf("Published payload %s target topic %s", string(payload), target))
 	return nil
 }
 
