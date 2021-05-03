@@ -327,6 +327,23 @@ handlers:
                 description: target syntax changes depending on the driver, using rabbitmq `[exchange]:[routing-key]`
                 type: string
 
+        - name: listen_fault_tolerance
+          description: |
+                listen for messages on a given queue with forever loop from expected target and with error tolerance (fault tolerance). Declaration should be before the publish action
+          handle: listenFaultTolerance
+          expressions:
+              - expect message from state $state and $resource with target $target and with total $error tolerance
+          parameters:
+              - name: state
+                description: previous state
+                type: string
+              - name: target
+                description: target syntax changes depending on the driver, using rabbitmq `[exchange]:[routing-key]`
+                type: string
+              - name: error
+                description: total error tolerance is given for the state
+                type: number
+
         - name: count
           description: count messages for a given target. Declaration should be before the publish action
           handle: countMessage
