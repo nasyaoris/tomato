@@ -104,7 +104,7 @@ func (mr *MockResourceMockRecorder) Listen(target interface{}) *gomock.Call {
 
 func (m *MockResource) ListenForever(target string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Listen", target)
+	ret := m.ctrl.Call(m, "ListenForever", target)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
@@ -113,6 +113,19 @@ func (m *MockResource) ListenForever(target string) error {
 func (mr *MockResourceMockRecorder) ListenForever(target interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListenForever", reflect.TypeOf((*MockResource)(nil).ListenForever), target)
+}
+
+func (m *MockResource) ListenFaultTolerance(state string, target string, expectedError int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListenFaultTolerance", state, target, expectedError)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Listen indicates an expected call of Listen
+func (mr *MockResourceMockRecorder) ListenFaultTolerance(state, target, expectedError interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListenFaultTolerance", reflect.TypeOf((*MockResource)(nil).ListenFaultTolerance), target)
 }
 
 // Fetch mocks base method

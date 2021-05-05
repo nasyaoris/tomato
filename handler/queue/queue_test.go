@@ -138,6 +138,48 @@ func TestListenMessageForever(t *testing.T) {
 	}
 }
 
+func TestListenFaultTolerance(t *testing.T) {
+	fmt.Println("masuk test listen forever")
+	ctrl := gomock.NewController(t)
+
+	defer ctrl.Finish()
+
+	q := mocks.NewMockResource(ctrl)
+	h := New(map[string]Resource{"q": q})
+
+	for _, tc := range []struct {
+		name string
+
+		resourceName string
+		target       string
+
+		err string
+	}{
+		{
+			name: "invalid resource name",
+			err:  "not found",
+		},
+		{
+			name:         "",
+			resourceName: "q",
+			target:       "abc",
+		},
+	} {
+		if tc.err == "" {
+			q.EXPECT().Listen(tc.target).Return(nil)
+		}
+
+		err := h.listenMessageForever(tc.resourceName, tc.target)
+		if err != nil {
+			assert.Contains(t, err.Error(), tc.err)
+		}
+		if tc.err != "" {
+			assert.Error(t, err)
+		}
+
+	}
+}
+
 func TestCountMessage(t *testing.T) {
 	ctrl := gomock.NewController(t)
 

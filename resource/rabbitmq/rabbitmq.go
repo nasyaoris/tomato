@@ -2,6 +2,7 @@ package rabbitmq
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -208,6 +209,69 @@ func (c *RabbitMQ) ListenForever(target string) error {
 	<-forever
 
 	return nil
+}
+
+// Listen creates a consumer on the passed target, creates the queue, and puts the messages
+// into consumedMessage map for later access
+func (c *RabbitMQ) ListenFaultTolerance(state string, target string, expectedError int) error {
+	ch, err := c.conn.Channel()
+	if err != nil {
+		return errors.Wrapf(err, "%s: listen attempt failed", resourceName)
+	}
+
+	exchange, key := c.target(target)
+
+	if err := exchangeDeclare(ch, exchange); err != nil {
+		return errors.Wrapf(err, "%s: failed to declare exchange `%s`", resourceName, exchange)
+	}
+
+	q, err := queueDeclare(ch, c.queueName(exchange, key))
+	if err != nil {
+		return errors.Wrapf(err, "%s: failed to declare queue `%s`", resourceName, c.queueName(exchange, key))
+	}
+
+	if err := queueBind(ch, q.Name, exchange, key+".*"); err != nil {
+		return errors.Wrapf(err, "%s: failed to bind to queue `%s`", resourceName, q.Name)
+	}
+
+	if _, err := ch.QueuePurge(q.Name, false); err != nil {
+		return errors.Wrapf(err, "%s: failed to purge to queue `%s`", resourceName, q.Name)
+	}
+	c.consumedMessage[target] = make([][]byte, 0)
+
+	msgs, err := consume(ch, q.Name)
+	if err != nil {
+		return errors.Wrapf(err, "%s: failed to consume messages from queue `%s`", resourceName, q.Name)
+	}
+
+	forever := make(chan bool)
+	errc := error(nil)
+
+	go func(msgs <-chan amqp.Delivery, target string) error {
+		countError := 0
+		err := error(nil)
+		for d := range msgs {
+			currState := strings.Split(d.RoutingKey, ".")
+			if currState[1] != state {
+				countError += 1
+			} else {
+				c.consume(target, d.Body)
+				fmt.Println(fmt.Sprintf("msg:%s from target topic %s", string(d.Body), target))
+				fmt.Println(c.consumedMessage)
+			}
+			if countError > expectedError {
+				errc = errors.Errorf("receive a not expected message more than %s", strconv.Itoa(expectedError))
+				forever <- false
+			}
+			if strings.Contains(string(d.Body), "Stop Listen") {
+				forever <- false
+			}
+		}
+		return err
+	}(msgs, target)
+	<-forever
+
+	return errc
 }
 
 // PublishFromFile attempts to publish a message read from a file to the passed target
