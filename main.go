@@ -81,7 +81,6 @@ func main() {
 		}
 
 		t := tomato.New(conf, log)
-		log.Println("masuk pertama kali disini")
 
 		if err := t.Verify(); err != nil {
 			return errors.Wrap(err, "Verification failed")

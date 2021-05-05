@@ -47,7 +47,6 @@ func (t *Tomato) Verify() error {
 }
 
 func (t *Tomato) Run() error {
-	t.log.Println("masuk run pertama")
 	t.log.Println("🍅 testing suite starting...")
 	opts := godog.Options{
 		Output:        colors.Colored(os.Stdout),

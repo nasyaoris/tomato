@@ -253,7 +253,6 @@ func (c *RabbitMQ) ListenFaultTolerance(state string, target string, expectedErr
 		for d := range msgs {
 			currState := strings.Split(d.RoutingKey, ".")
 			if currState[1] != state {
-				fmt.Println("masuk countError")
 				countError += 1
 			} else {
 				c.consume(target, d.Body)
@@ -261,8 +260,6 @@ func (c *RabbitMQ) ListenFaultTolerance(state string, target string, expectedErr
 				fmt.Println(c.consumedMessage)
 			}
 			if countError > expectedError {
-				fmt.Println(countError)
-				fmt.Println("masuk error")
 				errc = errors.Errorf("receive a not expected message more than %s", strconv.Itoa(expectedError))
 				forever <- false
 			}
