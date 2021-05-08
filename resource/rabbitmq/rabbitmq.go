@@ -259,11 +259,10 @@ func (c *RabbitMQ) ListenFaultTolerance(state string, target string, expectedErr
 				fmt.Println(fmt.Sprintf("msg:%s from target topic %s", string(d.Body), target))
 				fmt.Println(c.consumedMessage)
 			}
-			if countError > expectedError {
-				errc = errors.Errorf("receive a not expected message more than %s", strconv.Itoa(expectedError))
-				forever <- false
-			}
 			if strings.Contains(string(d.Body), "Stop Listen") {
+				forever <- false
+			} else if countError > expectedError {
+				errc = errors.Errorf("receive a not expected message more than %s", strconv.Itoa(expectedError))
 				forever <- false
 			}
 		}
