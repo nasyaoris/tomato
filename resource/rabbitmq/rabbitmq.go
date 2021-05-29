@@ -213,7 +213,7 @@ func (c *RabbitMQ) ListenForever(target string) error {
 
 // Listen creates a consumer on the passed target, creates the queue, and puts the messages
 // into consumedMessage map for later access
-func (c *RabbitMQ) ListenFaultTolerance(state string, target string, expectedError int) error {
+func (c *RabbitMQ) ListenFaultTolerance(state string, target string, expectedError int, timeout int) error {
 	ch, err := c.conn.Channel()
 	if err != nil {
 		return errors.Wrapf(err, "%s: listen attempt failed", resourceName)
@@ -248,8 +248,25 @@ func (c *RabbitMQ) ListenFaultTolerance(state string, target string, expectedErr
 	errc := error(nil)
 
 	go func(msgs <-chan amqp.Delivery, target string) error {
+		DurationOfTime := time.Duration(timeout) * time.Second
+		f := func() {
+			messages, err := c.Fetch(target)
+			if len(messages) == 0 {
+				errc = errors.Errorf("not receive expected msg after %s seconds", strconv.Itoa(timeout))
+				forever <- false
+			}
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+
+		Timer1 := time.AfterFunc(DurationOfTime, f)
+
+		defer Timer1.Stop()
+
 		countError := 0
 		err := error(nil)
+
 		for d := range msgs {
 			currState := strings.Split(d.RoutingKey, ".")
 			if currState[1] != state {
@@ -259,6 +276,7 @@ func (c *RabbitMQ) ListenFaultTolerance(state string, target string, expectedErr
 				fmt.Println(fmt.Sprintf("msg:%s from target topic %s", string(d.Body), target))
 				fmt.Println(c.consumedMessage)
 			}
+
 			if strings.Contains(string(d.Body), "Stop Listen") {
 				forever <- false
 			} else if countError > expectedError {
@@ -266,6 +284,7 @@ func (c *RabbitMQ) ListenFaultTolerance(state string, target string, expectedErr
 				forever <- false
 			}
 		}
+
 		return err
 	}(msgs, target)
 	<-forever

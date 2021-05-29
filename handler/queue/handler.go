@@ -9,7 +9,7 @@ func (h *Handler) Register(s *godog.Suite) {
 	s.Step(`^publish message to "([^"]*)" target "([^"]*)" with payload from file "([^"]*)"$`, h.publishMessageFromFile)
 	s.Step(`^listen message from "([^"]*)" target "([^"]*)"$`, h.listenMessage)
 	s.Step(`^listen message from "([^"]*)" target "([^"]*)" forever$`, h.listenMessageForever)
-	s.Step(`^expect message from state "([^"]*)" and "([^"]*)" with target "([^"]*)" and with total (\d+) tolerance$`, h.listenFaultTolerance)
+	s.Step(`^expect message from state "([^"]*)" and "([^"]*)" with target "([^"]*)" and with total (\d+) tolerance and (\d+) seconds timeout$`, h.listenFaultTolerance)
 	s.Step(`^message from "([^"]*)" target "([^"]*)" count should be (\d+)$`, h.countMessage)
 	s.Step(`^message from "([^"]*)" target "([^"]*)" should contain$`, h.compareMessageContains)
 	s.Step(`^message from "([^"]*)" target "([^"]*)" should equal$`, h.compareMessageEquals)

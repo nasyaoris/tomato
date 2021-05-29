@@ -1,5 +1,4 @@
 ---
-
 handlers:
     - name: http/client
       description: http client that can be used for sending http requests and comparing the responses
@@ -88,7 +87,6 @@ handlers:
                 - name: header_value
                   description: http header value (`application/json`)
                   type: string
-
 
           - name: response_body_contains
             description: check response body contains a given json fields
@@ -230,7 +228,6 @@ handlers:
                   description: request count
                   type: number
 
-
     - name: database/sql
       description: database driver that interacts with a sql database
       resources:
@@ -273,194 +270,197 @@ handlers:
           - "rabbitmq"
           - "nsq"
       options:
-        - name: datasource
-          description: queue source dsn (`amqp://user:pass@host:port/`)
-          type: string
-        - name: stubs_path
-          description: stubs file path (`./stubs`)
-          type: string
+          - name: datasource
+            description: queue source dsn (`amqp://user:pass@host:port/`)
+            type: string
+          - name: stubs_path
+            description: stubs file path (`./stubs`)
+            type: string
       actions:
-        - name: publish
-          description: publish a message to message queue
-          handle: publishMessage
-          expressions:
-              - publish message to $resource target $target with payload $payload
-          parameters:
-              - name: target
-                description: target syntax changes depending on the driver, using rabbitmq `[exchange]:[routing-key]`
-                type: string
-              - name: payload
-                description: queue message payload
-                type: json
-        - name: publish_from_file
-          description: publish a message to message queue from a file
-          handle: publishMessageFromFile
-          expressions:
-              - publish message to $resource target $target with payload from file $file
-          parameters:
-              - name: target
-                description: target syntax changes depending on the driver, using rabbitmq `[exchange]:[routing-key]`
-                type: string
-              - name: file
-                description: queue message payload file name
-                type: string
+          - name: publish
+            description: publish a message to message queue
+            handle: publishMessage
+            expressions:
+                - publish message to $resource target $target with payload $payload
+            parameters:
+                - name: target
+                  description: target syntax changes depending on the driver, using rabbitmq `[exchange]:[routing-key]`
+                  type: string
+                - name: payload
+                  description: queue message payload
+                  type: json
+          - name: publish_from_file
+            description: publish a message to message queue from a file
+            handle: publishMessageFromFile
+            expressions:
+                - publish message to $resource target $target with payload from file $file
+            parameters:
+                - name: target
+                  description: target syntax changes depending on the driver, using rabbitmq `[exchange]:[routing-key]`
+                  type: string
+                - name: file
+                  description: queue message payload file name
+                  type: string
 
-        - name: listen
-          description: |
+          - name: listen
+            description: |
                 listen for messages on a given queue. Declaration should be before the publish action
-          handle: listenMessage
-          expressions:
-              - listen message from $resource target $target
-          parameters:
-              - name: target
-                description: target syntax changes depending on the driver, using rabbitmq `[exchange]:[routing-key]`
-                type: string
+            handle: listenMessage
+            expressions:
+                - listen message from $resource target $target
+            parameters:
+                - name: target
+                  description: target syntax changes depending on the driver, using rabbitmq `[exchange]:[routing-key]`
+                  type: string
 
-        - name: listen_forever
-          description: |
+          - name: listen_forever
+            description: |
                 listen for messages on a given queue with forever loop. Declaration should be before the publish action
-          handle: listenMessageForever
-          expressions:
-              - listen message from $resource target $target forever
-          parameters:
-              - name: target
-                description: target syntax changes depending on the driver, using rabbitmq `[exchange]:[routing-key]`
-                type: string
+            handle: listenMessageForever
+            expressions:
+                - listen message from $resource target $target forever
+            parameters:
+                - name: target
+                  description: target syntax changes depending on the driver, using rabbitmq `[exchange]:[routing-key]`
+                  type: string
 
-        - name: listen_fault_tolerance
-          description: |
+          - name: listen_fault_tolerance
+            description: |
                 listen for messages on a given queue with forever loop from expected target and with error tolerance (fault tolerance). Declaration should be before the publish action
-          handle: listenFaultTolerance
-          expressions:
-              - expect message from state $state and $resource with target $target and with total $error tolerance
-          parameters:
-              - name: state
-                description: previous state
-                type: string
-              - name: target
-                description: target syntax changes depending on the driver, using rabbitmq `[exchange]:[routing-key]`
-                type: string
-              - name: error
-                description: total error tolerance is given for the state
-                type: number
+            handle: listenFaultTolerance
+            expressions:
+                - expect message from state $state and $resource with target $target and with total $error tolerance and $time seconds timeout
+            parameters:
+                - name: state
+                  description: previous state
+                  type: string
+                - name: target
+                  description: target syntax changes depending on the driver, using rabbitmq `[exchange]:[routing-key]`
+                  type: string
+                - name: error
+                  description: total error tolerance is given for the state
+                  type: number
+                - name: time
+                  description: duration of timeout
+                  type: number
 
-        - name: count
-          description: count messages for a given target. Declaration should be before the publish action
-          handle: countMessage
-          expressions:
-              - message from $resource target $target count should be $count
-          parameters:
-              - name: target
-                description: target syntax changes depending on the driver, using rabbitmq `[exchange]:[routing-key]`
-                type: string
-              - name: count
-                description: number of expected messages in the queue
-                type: number
+          - name: count
+            description: count messages for a given target. Declaration should be before the publish action
+            handle: countMessage
+            expressions:
+                - message from $resource target $target count should be $count
+            parameters:
+                - name: target
+                  description: target syntax changes depending on the driver, using rabbitmq `[exchange]:[routing-key]`
+                  type: string
+                - name: count
+                  description: number of expected messages in the queue
+                  type: number
 
-        - name: compareContains
-          description: compare message payload by checking if the message contains other JSON. Declaration should be before the publish action
-          handle: compareMessageContains
-          expressions:
-              - message from $resource target $target should contain $payload
-          parameters:
-              - name: target
-                description: target syntax changes depending on the driver, using rabbitmq `[exchange]:[routing-key]`
-                type: string
-              - name: payload
-                description: queue message payload
-                type: json
+          - name: compareContains
+            description: compare message payload by checking if the message contains other JSON. Declaration should be before the publish action
+            handle: compareMessageContains
+            expressions:
+                - message from $resource target $target should contain $payload
+            parameters:
+                - name: target
+                  description: target syntax changes depending on the driver, using rabbitmq `[exchange]:[routing-key]`
+                  type: string
+                - name: payload
+                  description: queue message payload
+                  type: json
 
-        - name: compareEquals
-          description: compare message payload by checking for exact JSON matches. Declaration should be before the publish action
-          handle: compareMessageEquals
-          expressions:
-              - message from $resource target $target should equal $payload
-          parameters:
-              - name: target
-                description: target syntax changes depending on the driver, using rabbitmq `[exchange]:[routing-key]`
-                type: string
-              - name: payload
-                description: queue message payload
-                type: json
+          - name: compareEquals
+            description: compare message payload by checking for exact JSON matches. Declaration should be before the publish action
+            handle: compareMessageEquals
+            expressions:
+                - message from $resource target $target should equal $payload
+            parameters:
+                - name: target
+                  description: target syntax changes depending on the driver, using rabbitmq `[exchange]:[routing-key]`
+                  type: string
+                - name: payload
+                  description: queue message payload
+                  type: json
 
     - name: shell
       description: to communicate with shell command
       resources:
           - "shell"
       options:
-        - name: prefix
-          description: shell command prefixes
-          type: string
+          - name: prefix
+            description: shell command prefixes
+            type: string
       actions:
-        - name: execute
-          description: execute shell command
-          handle: execCommand
-          expressions:
-              - $resource execute $command
-          parameters:
-              - name: command
-                description: command that gonna get executed
-                type: string
+          - name: execute
+            description: execute shell command
+            handle: execCommand
+            expressions:
+                - $resource execute $command
+            parameters:
+                - name: command
+                  description: command that gonna get executed
+                  type: string
 
-        - name: stdout_contains
-          description: check stdout for executed command contains a given value
-          handle: checkStdoutContains
-          expressions:
-              - $resource stdout should contains $substring
-          parameters:
-              - name: substring
-                description: substring of the message
-                type: string
+          - name: stdout_contains
+            description: check stdout for executed command contains a given value
+            handle: checkStdoutContains
+            expressions:
+                - $resource stdout should contains $substring
+            parameters:
+                - name: substring
+                  description: substring of the message
+                  type: string
 
-        - name: stdout_not_contains
-          description: check stdout for executed command not contains a given value
-          handle: checkStdoutNotContains
-          expressions:
-              - $resource stdout should not contains $substring
-          parameters:
-              - name: substring
-                description: substring of the message
-                type: string
+          - name: stdout_not_contains
+            description: check stdout for executed command not contains a given value
+            handle: checkStdoutNotContains
+            expressions:
+                - $resource stdout should not contains $substring
+            parameters:
+                - name: substring
+                  description: substring of the message
+                  type: string
 
-        - name: stderr_contains
-          description: check stderr for executed command contains a given value
-          handle: checkStderrContains
-          expressions:
-              - $resource stderr should contains $substring
-          parameters:
-              - name: substring
-                description: substring of the message
-                type: string
+          - name: stderr_contains
+            description: check stderr for executed command contains a given value
+            handle: checkStderrContains
+            expressions:
+                - $resource stderr should contains $substring
+            parameters:
+                - name: substring
+                  description: substring of the message
+                  type: string
 
-        - name: stderr_not_contains
-          description: check stderr for executed command not contains a given value
-          handle: checkStderrNotContains
-          expressions:
-              - $resource stderr should not contains $substring
-          parameters:
-              - name: substring
-                description: substring of the message
-                type: string
+          - name: stderr_not_contains
+            description: check stderr for executed command not contains a given value
+            handle: checkStderrNotContains
+            expressions:
+                - $resource stderr should not contains $substring
+            parameters:
+                - name: substring
+                  description: substring of the message
+                  type: string
 
-        - name: exit_code_equal
-          description: check exit code is equal given value
-          handle: checkExitCodeEqual
-          expressions:
-              - $resource exit code equal to $exit_code
-          parameters:
-              - name: exit_code
-                description: exit code of the executed command
-                type: number
+          - name: exit_code_equal
+            description: check exit code is equal given value
+            handle: checkExitCodeEqual
+            expressions:
+                - $resource exit code equal to $exit_code
+            parameters:
+                - name: exit_code
+                  description: exit code of the executed command
+                  type: number
 
-        - name: exit_code_not_equal
-          description: check exit code is not equal given value
-          handle: checkExitCodeNotEqual
-          expressions:
-              - $resource exit code not equal to $exit_code
-          parameters:
-              - name: exit_code
-                description: exit code of the executed command
-                type: number
+          - name: exit_code_not_equal
+            description: check exit code is not equal given value
+            handle: checkExitCodeNotEqual
+            expressions:
+                - $resource exit code not equal to $exit_code
+            parameters:
+                - name: exit_code
+                  description: exit code of the executed command
+                  type: number
 
     - name: cache
       description: cache driver that interacts with a cache service
@@ -504,7 +504,7 @@ handlers:
             description: check if such key exists in the cache
             handle: valueExists
             expressions:
-                -  cache $resource has key $key
+                - cache $resource has key $key
             parameters:
                 - name: key
                   description: key of content

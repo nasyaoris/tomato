@@ -115,15 +115,15 @@ func (mr *MockResourceMockRecorder) ListenForever(target interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListenForever", reflect.TypeOf((*MockResource)(nil).ListenForever), target)
 }
 
-func (m *MockResource) ListenFaultTolerance(state string, target string, expectedError int) error {
+func (m *MockResource) ListenFaultTolerance(state string, target string, expectedError int, timeout int) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListenFaultTolerance", state, target, expectedError)
+	ret := m.ctrl.Call(m, "ListenFaultTolerance", state, target, expectedError, timeout)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Listen indicates an expected call of Listen
-func (mr *MockResourceMockRecorder) ListenFaultTolerance(state, target, expectedError interface{}) *gomock.Call {
+func (mr *MockResourceMockRecorder) ListenFaultTolerance(state, target, expectedError, timeout interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListenFaultTolerance", reflect.TypeOf((*MockResource)(nil).ListenFaultTolerance), target)
 }
