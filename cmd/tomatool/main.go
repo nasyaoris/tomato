@@ -80,7 +80,7 @@ func GenerateHandler(dictionaryPath, outputPath string) error {
 	}
 
 	for resourceName, r := range out {
-		if err := ioutil.WriteFile("/Users/t-oristania.nabasya/go/pkg/mod/github.com/tomato@v1.4.2/handler/"+resourceName+"/handler.go", r.Bytes(), 0755); err != nil {
+		if err := ioutil.WriteFile("/Users/nasyaoristania/go/pkg/mod/github.com/tomato/handler/"+resourceName+"/handler.go", r.Bytes(), 0755); err != nil {
 			return err
 		}
 	}

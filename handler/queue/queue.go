@@ -15,7 +15,7 @@ type Resource interface {
 	resource.Resource
 	Listen(target string) error
 	ListenForever(target string) error
-	ListenFaultTolerance(state string, target string, expectedError int) error
+	ListenFaultTolerance(state string, target string, expectedError int, timeout int) error
 	Fetch(target string) ([][]byte, error)
 	Publish(target string, payload []byte) error
 	PublishFromFile(target, file string) error
@@ -64,13 +64,13 @@ func (h *Handler) listenMessageForever(resourceName, target string) error {
 	return r.ListenForever(target)
 }
 
-func (h *Handler) listenFaultTolerance(state string, resourceName, target string, expectedError int) error {
+func (h *Handler) listenFaultTolerance(state string, resourceName, target string, expectedError int, timeout int) error {
 	r, ok := h.r[resourceName]
 	if !ok {
 		return fmt.Errorf("%s not found", resourceName)
 	}
 
-	return r.ListenFaultTolerance(state, target, expectedError)
+	return r.ListenFaultTolerance(state, target, expectedError, timeout)
 }
 
 func (h *Handler) countMessage(resourceName, target string, expectedCount int) error {
